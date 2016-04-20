@@ -1,0 +1,29 @@
+Infrastructure Overview
+Client_1 --(Send request)--> Server --(Server Push)--> Client_2
+
+1. Client_1 send a request to Server
+2. Server process request & push it to Client_2
+3. Client_2 displays the changes
+
+Note:
+* Servlet auto refresh: http://www.tutorialspoint.com/servlets/servlets-auto-refresh.htm
+* http://www.javaworld.com/article/2076063/java-web-development/pushlets--send-events-from-servlets-to-dhtml-client-browsers.html
+* http://docstore.mik.ua/orelly/java-ent/servlet/ch06_03.htm
+* http://pushlets.com/
+
+Features:
+* Authentication - user will have to authenticate in order to use the web app
+
+* Message Posting - user will enter a message which will be forwarded to the web app that sits and waits for message & display it on the mirror. Used as task list. Each user has a different task list.
+
+* APIs - user will be able to integrate certain services & display messages based on their user roles & privleges
+	* Weather
+		- http://openweathermap.org/api
+	* News
+		- http://developer.nytimes.com/docs/top_stories_api/
+		- Get top stories, allow user to choose different sections
+	* Uber (Unusable for children)
+		- https://github.com/uber/rides-java-sdk/
+		- https://developer.uber.com/docs/tutorials-rides-api
+
+* Check status of the mirror (?!) - user could check whether the mirror is on or off

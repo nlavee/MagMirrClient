@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+  <display-name>Magic Mirror Application</display-name>
+
+  <description>
+    This web application responds to any GET or POST requests and forward it to the mirror, which is another application
+  </description>
+  
+  <servlet>
+    <servlet-name>register</servlet-name>
+    <display-name>Register Servlet</display-name>
+    <description>The controller that allows user to register their mirror</description>
+    <servlet-class>org.nlavee.skidmore.webapps.web.Register</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>register</servlet-name>
+    <url-pattern>/register/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>fetchData</servlet-name>
+    <display-name>FetchData Servlet</display-name>
+    <description>The controller that allows user to fetch data for their mirror</description>
+    <servlet-class>org.nlavee.skidmore.webapps.web.FetchDataServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+   <servlet-mapping>
+    <servlet-name>fetchData</servlet-name>
+    <url-pattern>/fetch_data/*</url-pattern>
+  </servlet-mapping>
+  
+  <welcome-file-list>
+    <welcome-file>register</welcome-file>
+  </welcome-file-list>
+</web-app>
