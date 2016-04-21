@@ -2,7 +2,7 @@
 <%@page pageEncoding="UTF-8"%>
 <%@page import="org.nlavee.skidmore.webapps.web.VarNames"%>
 <%@page import="org.json.JSONObject"%>
-<%@page import="java.util.Date" %>
+<%@page import="java.util.*" %>
 <%@page import="java.text.*" %>
 <%@page import="org.nlavee.skidmore.webapps.database.beans.Message" %>
 
@@ -20,6 +20,8 @@
 	String wind = request.getAttribute("wind").toString();
 	String place = request.getAttribute("place").toString();
 	Message m = (Message) request.getAttribute("message");
+	ArrayList<String> newsAll = (ArrayList<String>) request.getAttribute("news");
+	
 %>
 
 <!DOCTYPE html>
@@ -41,6 +43,7 @@
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
 	integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
 	crossorigin="anonymous"></script>
+<link href='https://fonts.googleapis.com/css?family=VT323' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="staticFiles/css/main.css">
 <meta http-equiv="refresh" content="5" />
 <title>MagMirr Client</title>
@@ -59,21 +62,24 @@
 		</div>
 	</div>
 	<div class="row">
-		<h1><%=dateFormat.format(date)%></h1>
+		<h1 class="date"><%=dateFormat.format(date)%></h1>
 	</div>
 	<div class="row">
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<h3>
-				Weather @ <%=place%>:
+				<b>Weather @ <%=place%></b>
 			</h3>
 		</div>
-		<div class="col-md-8">
-			<h3>Current Top News for Selected Topics:</h3>
+		<div class="col-md-5">
+			<h3><b>Top News For Your Selected Topics</b></h3>
+		</div>
+		<div class="col-md-4">
+		
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-4">
-				<%=weatherDesc%>&nbsp;
+		<div class="col-md-3">
+				<p><%=weatherDesc%>&nbsp;
 				<%
 				if (weatherDesc.equals("clear sky")) {
 				%>
@@ -85,20 +91,39 @@
 				<%
 					}
 				%>
+				</p>
 				<h4><%=temp%>&deg;</h4>
 				<h4><%=humidity%>&#37; (Humidity <img src="staticFiles/icons/humidity.png"/>)</h4>
-				<h4><%=wind%> (Wind <img src="staticFiles/icons/wind.png"/>)</h4>
+				<h4><%=wind%> km/h (Wind <img src="staticFiles/icons/wind.png"/>)</h4>
 		</div>
-		<div class="col-md-8">
-			
+		<div class="col-md-5">
+			<%
+				for(String news : newsAll)
+				{
+					%>
+						<h6><%=news%></h6>
+					<% 
+				}
+			%>
+		</div>
+		<div class="col-md-4">
+			<%
+				if(request.getAttribute("lyft") == null)
+				{
+					%>
+						<p>No information from Lyft at the moment.</p>
+					<%
+				}
+			%>
 		</div>
 	</div>
+	<br/>
 	<div class="row">
 		<%
 		if(m != null)
 		{
 			%>
-			<h2>Your Message:</h2>
+			<h3>Your Message:</h3>
 			<h3>&ldquo;<%=m.getBody()%>&rdquo;</h3>
 			<%
 		}

@@ -14,6 +14,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.nlavee.skidmore.webapps.web.APIKEYS;
 import org.nlavee.skidmore.webapps.web.VarNames;
@@ -66,6 +67,7 @@ public class NewsAPIWrapper implements NewsInterface, VarNames, APIKEYS{
 			conn.setRequestProperty("Accept", "application/json");
 
 			if (conn.getResponseCode() != 200) {
+				LOGGER.info("Returned: " + conn.getContent());
 				throw new RuntimeException("Failed : HTTP error code : "
 						+ conn.getResponseCode());
 			}
@@ -116,54 +118,63 @@ public class NewsAPIWrapper implements NewsInterface, VarNames, APIKEYS{
 		{
 			LOGGER.info("Results gotten from News API is not empty");
 			JSONArray resultArray = jsonObj.getJSONArray("results");
+			LOGGER.info("Results we get back from News API: " + resultArray.toString());
 			res = new ArrayList<NewsObj>();
 
-			for(int i = 0 ; i < 5 || i>= resultArray.length() ; i++)
+			try
 			{
-				JSONObject oneEntry = resultArray.getJSONObject(i);
-				LOGGER.info(oneEntry);
-
-				//parsing for different object attributes
-				String section = oneEntry.getString("section");
-				String title = oneEntry.getString("title");
-				String newsAbstract = oneEntry.getString("abstract");
-				String url = oneEntry.getString("url");
-				String dateString = oneEntry.getString("published_date");
-				LOGGER.info(oneEntry);
-
-				// Sometimes, this key doesn't exist as an array
-				JSONArray multimedia = null;
-				String urlMultimedia= new String();
-				try
+				for(int i = 1 ; i < 6 || i>= resultArray.length() ; i++)
 				{
-					multimedia = oneEntry.getJSONArray("multimedia");
-					JSONObject standardMultimediaObject = multimedia.getJSONObject(0);
-					urlMultimedia = standardMultimediaObject.getString("url");
-				}
-				catch(Throwable e)
-				{
-					LOGGER.error("Key multimedia didn't work", e);
-				}
+					JSONObject oneEntry = resultArray.getJSONObject(i);
+					LOGGER.info(oneEntry);
 
-				// Sometimes, this key doesn't exist as an array
-				ArrayList<String> tags = new ArrayList<>();
-				try{
-					JSONArray tagsList = oneEntry.getJSONArray("des_facet");
-					for(int j = 0 ; j < tagsList.length(); j++)
+					//parsing for different object attributes
+					String section = oneEntry.getString("section");
+					String title = oneEntry.getString("title");
+					String newsAbstract = oneEntry.getString("abstract");
+					String url = oneEntry.getString("url");
+					String dateString = oneEntry.getString("published_date");
+					LOGGER.info(oneEntry);
+
+					// Sometimes, this key doesn't exist as an array
+					JSONArray multimedia = null;
+					String urlMultimedia= new String();
+					try
 					{
-						String tag = tagsList.getString(j);
-						tags.add(tag);
+						multimedia = oneEntry.getJSONArray("multimedia");
+						JSONObject standardMultimediaObject = multimedia.getJSONObject(0);
+						urlMultimedia = standardMultimediaObject.getString("url");
 					}
-				}
-				catch(Throwable e)
-				{
-					LOGGER.error("Key des_facet didn't work.", e);
-				}
+					catch(Throwable e)
+					{
+						LOGGER.error("Key multimedia didn't work", e);
+					}
 
-				NewsObj newNews = new NewsObj(title, newsAbstract, url, dateString, urlMultimedia, section, tags);
-				LOGGER.info(newNews);
-				res.add(newNews);
+					// Sometimes, this key doesn't exist as an array
+					ArrayList<String> tags = new ArrayList<>();
+					try{
+						JSONArray tagsList = oneEntry.getJSONArray("des_facet");
+						for(int j = 0 ; j < tagsList.length(); j++)
+						{
+							String tag = tagsList.getString(j);
+							tags.add(tag);
+						}
+					}
+					catch(Throwable e)
+					{
+						LOGGER.error("Key des_facet didn't work.", e);
+					}
+
+					NewsObj newNews = new NewsObj(title, newsAbstract, url, dateString, urlMultimedia, section, tags);
+					LOGGER.info(newNews);
+					res.add(newNews);
+				}
 			}
+			catch (JSONException e)
+			{
+				LOGGER.error("Message couldn't get parsed: " + e);
+			}
+
 		}
 		return res;
 	}

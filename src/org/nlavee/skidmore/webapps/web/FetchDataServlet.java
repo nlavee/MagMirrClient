@@ -16,7 +16,9 @@ import org.nlavee.skidmore.webapps.database.beans.Message;
 import org.nlavee.skidmore.webapps.database.dao.ObjMapping;
 import org.nlavee.skidmore.webapps.database.interfaces.impl.NewsDBInterfaceImpl;
 import org.nlavee.skidmore.webapps.database.interfaces.impl.WeatherDBInterfaceImpl;
+import org.nlavee.skidmore.webapps.web.api.impl.NewsAPIWrapper;
 import org.nlavee.skidmore.webapps.web.api.impl.WeatherAPIWrapper;
+import org.nlavee.skidmore.webapps.web.model.NewsObj;
 
 public class FetchDataServlet extends HttpServlet implements VarNames {
 
@@ -115,6 +117,12 @@ public class FetchDataServlet extends HttpServlet implements VarNames {
 		fetchWeather(req,userId, om);
 		fetchNews(req,userName, om);
 		fetchMessage(req,userId, om);
+		fetchLyft(req,userId, om);
+
+	}
+
+	private void fetchLyft(HttpServletRequest req, Integer userId, ObjMapping om) {
+		// TODO Auto-generated method stub
 
 	}
 
@@ -126,35 +134,127 @@ public class FetchDataServlet extends HttpServlet implements VarNames {
 
 	private void fetchNews(HttpServletRequest req, String userName, ObjMapping om) {
 		NewsDBInterfaceImpl news = new NewsDBInterfaceImpl();
-		ArrayList<String> section = news.getNewsTopic(userName);
-		
+		ArrayList<String> sections = news.getNewsTopic(userName);
+
+		for(int i = 0 ; i < sections.size(); i++)
+		{
+			String section = sections.get(i);
+			switch(section)
+			{
+			case "1":
+				sections.set(i, "home");
+				break;
+			case "2":
+				sections.set(i, "world");
+				break;
+			case "3":
+				sections.set(i, "national");
+				break;
+			case "4":
+				sections.set(i, "politics");
+				break;
+			case "5":
+				sections.set(i, "nyregion");
+				break;
+			case "6":
+				sections.set(i, "business");
+				break;
+			case "7":
+				sections.set(i, "opinion");
+				break;
+			case "8":
+				sections.set(i, "technology");
+				break;
+			case "9":
+				sections.set(i, "science");
+				break;
+			case "10":
+				sections.set(i, "health");
+				break;
+			case "11":
+				sections.set(i, "sports");
+				break;
+			case "12":
+				sections.set(i, "arts");
+				break;
+			case "13":
+				sections.set(i, "fashion");
+				break;
+			case "14":
+				sections.set(i, "dining");
+				break;
+			case "15":
+				sections.set(i, "travel");
+				break;
+			case "16":
+				sections.set(i, "magazine");
+				break;
+			case "17":
+				sections.set(i, "realestate");
+				break;
+			}
+
+		}
+
+		String[] sectionsArray = new String[sections.size()];
+
+		NewsAPIWrapper newsAPI = new NewsAPIWrapper();
+		ArrayList<NewsObj> newsJson = 
+				newsAPI.chooseSections(sections.toArray(new String[sections.size()]));
+
+		ArrayList<String> parsedNews = parseNews(newsJson);
+		req.setAttribute("news", parsedNews);
+	}
+
+	private ArrayList<String> parseNews(ArrayList<NewsObj> newsJson) {
+		ArrayList<String> res = new ArrayList<>();
+
+		LOGGER.info("Parsing: " + newsJson);
+
+		if(newsJson != null)
+		{
+			for(int i = 0 ; i < newsJson.size(); i++)
+			{
+				NewsObj news = newsJson.get(i);
+
+				// parsing:
+				String title = news.getTitle();
+				String pubTime = news.getPublishedTime();
+				String abstractNews = news.getNewsAbstract();
+				String url = news.getUrl();
+
+				String formed = "&#34;" +  title + "&#34; ( @ " + pubTime + " ) <br/><i>" + abstractNews + "</i><hr/>";
+				res.add(formed);
+			}
+		}
+		return res;
 	}
 
 	private void fetchWeather(HttpServletRequest req, Integer userId,
 			ObjMapping om) {
 		WeatherDBInterfaceImpl weather = new WeatherDBInterfaceImpl();
 		Integer zipcode = weather.getWeather(userId);
-		
+
 		WeatherAPIWrapper weatherAPI = new WeatherAPIWrapper();
 		JSONObject weatherJson = weatherAPI.getWeather(zipcode);
-		
+
 		// general description
 		JSONArray weatherMain = weatherJson.getJSONArray("weather");
 		JSONObject weatherJsonWithMain = weatherMain.getJSONObject(0);
 		String desc = weatherJsonWithMain.getString("description");
-		
+
 		// temperature 
 		JSONObject weatherJSONTemp = weatherJson.getJSONObject("main");
 		int temperature = weatherJSONTemp.getInt("temp");
 		int humidity = weatherJSONTemp.getInt("humidity");
-		
+
 		// wind
 		JSONObject windJSON = weatherJson.getJSONObject("wind");
 		int wind = windJSON.getInt("speed");
-		
+
 		// place
 		String place = weatherJson.getString("name");
-		
+
 		req.setAttribute(WEATHER, weatherJson);
 		req.setAttribute("weather_description", desc);
 		req.setAttribute("temp", temperature);

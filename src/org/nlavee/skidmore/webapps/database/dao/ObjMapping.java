@@ -214,7 +214,7 @@ public class ObjMapping extends AbstractMapper {
 		return ret;
 	}
 
-	
+
 	private int getPasswordID(String userName) {
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
@@ -236,7 +236,7 @@ public class ObjMapping extends AbstractMapper {
 				pwID = rs.getInt("password_id");
 			}
 			connection.closeResultSet(rs);
-			
+
 		} catch (SQLException e) {
 			LOG.error("Could not retrieve password based on username", e);
 		}
@@ -254,7 +254,7 @@ public class ObjMapping extends AbstractMapper {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		String firstName = "";
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
@@ -276,7 +276,7 @@ public class ObjMapping extends AbstractMapper {
 
 		return firstName;
 	}
-	
+
 	/**
 	 * Method that saves the zipcode that user wants to use for retrieving weather data
 	 * @param zipcode
@@ -287,9 +287,9 @@ public class ObjMapping extends AbstractMapper {
 	{
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
-		
+
 		int Id = queryForID(userName);
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
@@ -326,21 +326,21 @@ public class ObjMapping extends AbstractMapper {
 			}
 		}
 	}
-	
+
 	public int queryForID(String userName) {
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int Id = -1;
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
-			"select id from user where username = ?;"
+					"select id from user where username = ?;"
 					);
 			stmt.setString(1, userName);
 			rs = stmt.executeQuery();
-			
+
 			while(rs.next())
 			{
 				Id = rs.getInt("id");
@@ -350,20 +350,20 @@ public class ObjMapping extends AbstractMapper {
 		{
 			LOG.error("Cannot query for id", e);
 		}
-		
+
 		return Id;
-		
+
 	}
 
 	public void saveNewsSection(String section, String username) {
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
-		
+
 		int Id = queryForID(username);
 		int sectionId = queryForSectionID(section);
-		
+
 		clearPreviousSavedSection(Id);
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
@@ -398,26 +398,26 @@ public class ObjMapping extends AbstractMapper {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	private void clearPreviousSavedSection(int userID) {
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
-		
+
 		try{
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
 					"delete from news_user where user_id = ?");
 			stmt.setInt(1, userID);
-			
+
 			stmt.executeUpdate();
 		}
 		catch (SQLException e)
 		{
 			LOG.error("Cannot clear saved news section", e);
 		}
-		
+
 	}
 
 	private int queryForSectionID(String section) {
@@ -425,15 +425,15 @@ public class ObjMapping extends AbstractMapper {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int Id = -1;
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
-			"select id from news where section_name = ?;"
+					"select id from news where section_name = ?;"
 					);
 			stmt.setString(1, section);
 			rs = stmt.executeQuery();
-			
+
 			while(rs.next())
 			{
 				Id = rs.getInt("id");
@@ -443,26 +443,26 @@ public class ObjMapping extends AbstractMapper {
 		{
 			LOG.error("Cannot query for id", e);
 		}
-		
+
 		return Id;
 	}
 
 	public boolean registerMirror(String ip, String userName) {
 		DatabaseConnection connection = null;
 		PreparedStatement stmt = null;
-		
+
 		int id = createMirror(ip);
 		int userID = queryForID(userName);
 		boolean success = false;
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
-			"insert into mirror_user (mirror_id, user_id, privilege_id) values (?, ?, ?)"
+					"insert into mirror_user (mirror_id, user_id, privilege_id) values (?, ?, ?)"
 					);
 			stmt.setInt(1, id);
 			stmt.setInt(2, userID);
 			stmt.setInt(3, 1);
-			
+
 			stmt.executeUpdate();
 			success = true;
 		}
@@ -476,7 +476,7 @@ public class ObjMapping extends AbstractMapper {
 				connection.closeStatement(stmt);
 			}
 		}
-		
+
 		return success;
 	}
 
@@ -485,15 +485,15 @@ public class ObjMapping extends AbstractMapper {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		int Id = -1;
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
-			"select id from mirror where mirror_IP_address = ?;"
+					"select id from mirror where mirror_IP_address = ?;"
 					);
 			stmt.setString(1, ip);
 			rs = stmt.executeQuery();
-			
+
 			while(rs.next())
 			{
 				Id = rs.getInt("id");
@@ -503,29 +503,29 @@ public class ObjMapping extends AbstractMapper {
 		{
 			LOG.error("Cannot query for mirror id", e);
 		}
-		
+
 		if(Id == -1)
 		{
 			try{
-			stmt = connection.setupPreparedStatement(
-					"insert into mirror (mirror_IP_address) values (?)");
-			stmt.setString(1, ip);
-			stmt.executeUpdate();
-			
+				stmt = connection.setupPreparedStatement(
+						"insert into mirror (mirror_IP_address) values (?)");
+				stmt.setString(1, ip);
+				stmt.executeUpdate();
+
 			}
 			catch( SQLException e)
 			{
 				LOG.error("Cannot insert mirror id", e);
 			}
-			
+
 			try {
 				connection = this.getDatabaseConnection();
 				stmt = connection.setupPreparedStatement(
-				"select id from mirror where mirror_IP_address = ?;"
+						"select id from mirror where mirror_IP_address = ?;"
 						);
 				stmt.setString(1, ip);
 				rs = stmt.executeQuery();
-				
+
 				while(rs.next())
 				{
 					Id = rs.getInt("id");
@@ -546,7 +546,7 @@ public class ObjMapping extends AbstractMapper {
 						e.printStackTrace();
 					}
 				}
-				
+
 				if(connection != null)
 				{
 					connection.closeStatement(stmt);
@@ -579,7 +579,7 @@ public class ObjMapping extends AbstractMapper {
 				zipCode = rs.getInt("zipcode");
 			}
 			connection.closeResultSet(rs);
-			
+
 		} catch (SQLException e) {
 			LOG.error("Could not retrieve password based on username", e);
 		}
@@ -594,15 +594,15 @@ public class ObjMapping extends AbstractMapper {
 		Integer Id = null;
 		Integer userID = null;
 		String userName = null;
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
-			"select id from mirror where mirror_IP_address = ?;"
+					"select id from mirror where mirror_IP_address = ?;"
 					);
 			stmt.setString(1, remoteAdd);
 			rs = stmt.executeQuery();
-			
+
 			while(rs.next())
 			{
 				Id = rs.getInt("id");
@@ -612,60 +612,62 @@ public class ObjMapping extends AbstractMapper {
 		{
 			LOG.error("Cannot query for mirror id", e);
 		}
-		
-		try {
-			connection = this.getDatabaseConnection();
-			stmt = connection.setupPreparedStatement(
-			"select user_id from mirror_user where mirror_id = ?;"
-					);
-			stmt.setInt(1, Id);
-			rs = stmt.executeQuery();
-			
-			while(rs.next())
-			{
-				userID = rs.getInt("user_id");
-			}
-		}
-		catch( SQLException e)
+
+		if((Integer) Id != null)
 		{
-			LOG.error("Cannot query for mirror id", e);
-		}
-		
-		try {
-			connection = this.getDatabaseConnection();
-			stmt = connection.setupPreparedStatement(
-			"select username from user where id = ?;"
-					);
-			stmt.setInt(1, userID);
-			rs = stmt.executeQuery();
-			
-			while(rs.next())
-			{
-				userName = rs.getString("username");
-			}
-		}
-		catch( SQLException e)
-		{
-			LOG.error("Cannot query for mirror id", e);
-		}
-		finally
-		{
-			if(rs != null)
-			{
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			try {
+				connection = this.getDatabaseConnection();
+				stmt = connection.setupPreparedStatement(
+						"select user_id from mirror_user where mirror_id = ?;"
+						);
+				stmt.setInt(1, Id);
+				rs = stmt.executeQuery();
+
+				while(rs.next())
+				{
+					userID = rs.getInt("user_id");
 				}
 			}
-			
-			if(connection != null)
+			catch( SQLException e)
 			{
-				connection.closeStatement(stmt);
+				LOG.error("Cannot query for mirror id", e);
+			}
+
+			try {
+				connection = this.getDatabaseConnection();
+				stmt = connection.setupPreparedStatement(
+						"select username from user where id = ?;"
+						);
+				stmt.setInt(1, userID);
+				rs = stmt.executeQuery();
+
+				while(rs.next())
+				{
+					userName = rs.getString("username");
+				}
+			}
+			catch( SQLException e)
+			{
+				LOG.error("Cannot query for mirror id", e);
+			}
+			finally
+			{
+				if(rs != null)
+				{
+					try {
+						rs.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+				if(connection != null)
+				{
+					connection.closeStatement(stmt);
+				}
 			}
 		}
-		
 		return userName;
 	}
 
@@ -674,9 +676,9 @@ public class ObjMapping extends AbstractMapper {
 		PreparedStatement stmt = null;
 		ArrayList<String> res = new ArrayList<String>();
 		ResultSet rs = null;
-		
+
 		int Id = queryForID(username);
-		
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
@@ -685,7 +687,7 @@ public class ObjMapping extends AbstractMapper {
 			stmt.setInt(1, Id);
 
 			rs = connection.runQuery(stmt);
-			
+
 			while(rs.next())
 			{
 				res.add(Integer.toString(rs.getInt("news_id")));
@@ -723,8 +725,8 @@ public class ObjMapping extends AbstractMapper {
 		PreparedStatement stmt = null;
 		Message res = null;
 		ResultSet rs = null;
-		
-		
+
+
 		try {
 			connection = this.getDatabaseConnection();
 			stmt = connection.setupPreparedStatement(
@@ -733,7 +735,7 @@ public class ObjMapping extends AbstractMapper {
 			stmt.setInt(1, userId);
 
 			rs = connection.runQuery(stmt);
-			
+
 			while(rs.next())
 			{
 				String body = rs.getString("body");
