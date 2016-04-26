@@ -133,6 +133,13 @@ public class ObjMapping extends AbstractMapper {
 		} catch (SQLException e) {
 			LOG.error("Fail at persisting user information into user table", e);
 		}
+		finally 
+		{
+			if(connection != null)
+			{
+				connection.closeStatement(stmt);
+			}
+		}
 
 		return ret;
 	}
@@ -209,6 +216,13 @@ public class ObjMapping extends AbstractMapper {
 				} catch (SQLException e) {
 					LOG.error("Fail to set up prepared stm for username checking", e);
 				}
+				finally
+				{
+					if(connection != null)
+					{
+						connection.closeResultSet(rs);
+					}
+				}
 			}
 		}
 		return ret;
@@ -239,6 +253,13 @@ public class ObjMapping extends AbstractMapper {
 
 		} catch (SQLException e) {
 			LOG.error("Could not retrieve password based on username", e);
+		}
+		finally
+		{
+			if(connection != null)
+			{
+				connection.closeResultSet(rs);
+			}
 		}
 
 		return pwID;
@@ -273,6 +294,13 @@ public class ObjMapping extends AbstractMapper {
 		} catch (SQLException e) {
 			LOG.error("Could not retrieve first_name based on username", e);
 		}
+		finally
+		{
+			if(connection != null)
+			{
+				connection.closeResultSet(rs);
+			}
+		}
 
 		return firstName;
 	}
@@ -305,14 +333,6 @@ public class ObjMapping extends AbstractMapper {
 		}
 		finally
 		{
-			if(stmt != null)
-			{
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					LOG.error("Could not close statement", e);
-				}
-			}
 			if(connection != null)
 			{
 				try
@@ -350,6 +370,20 @@ public class ObjMapping extends AbstractMapper {
 		{
 			LOG.error("Cannot query for id", e);
 		}
+		finally
+		{
+			if(connection != null)
+			{
+				try
+				{
+					connection.closeResultSet(rs);
+				}
+				catch(Throwable e)
+				{
+					LOG.error("Could not close connection ", e);
+				}
+			}
+		}
 
 		return Id;
 
@@ -378,24 +412,9 @@ public class ObjMapping extends AbstractMapper {
 		}
 		finally
 		{
-			if(stmt != null)
-			{
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					LOG.error("Could not close statement", e);
-				}
-			}
 			if(connection != null)
 			{
-				try
-				{
-					connection.closeStatement(stmt);
-				}
-				catch(Throwable e)
-				{
-					LOG.error("Could not close connection ", e);
-				}
+				connection.closeStatement(stmt);
 			}
 		}
 
@@ -416,6 +435,20 @@ public class ObjMapping extends AbstractMapper {
 		catch (SQLException e)
 		{
 			LOG.error("Cannot clear saved news section", e);
+		}
+		finally
+		{
+			if(connection != null)
+			{
+				try
+				{
+					connection.closeStatement(stmt);
+				}
+				catch(Throwable e)
+				{
+					LOG.error("Could not close connection ", e);
+				}
+			}
 		}
 
 	}
@@ -442,6 +475,20 @@ public class ObjMapping extends AbstractMapper {
 		catch( SQLException e)
 		{
 			LOG.error("Cannot query for id", e);
+		}
+		finally
+		{
+			if(connection != null)
+			{
+				try
+				{
+					connection.closeResultSet(rs);
+				}
+				catch(Throwable e)
+				{
+					LOG.error("Could not close connection ", e);
+				}
+			}
 		}
 
 		return Id;
@@ -537,19 +584,9 @@ public class ObjMapping extends AbstractMapper {
 			}
 			finally
 			{
-				if(rs != null)
-				{
-					try {
-						rs.close();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
 				if(connection != null)
 				{
-					connection.closeStatement(stmt);
+					connection.closeResultSet(rs);
 				}
 			}
 		}
@@ -578,10 +615,14 @@ public class ObjMapping extends AbstractMapper {
 			{
 				zipCode = rs.getInt("zipcode");
 			}
-			connection.closeResultSet(rs);
+			
 
 		} catch (SQLException e) {
 			LOG.error("Could not retrieve password based on username", e);
+		}
+		finally
+		{
+			connection.closeResultSet(rs);
 		}
 
 		return zipCode;
@@ -652,19 +693,9 @@ public class ObjMapping extends AbstractMapper {
 			}
 			finally
 			{
-				if(rs != null)
-				{
-					try {
-						rs.close();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
 				if(connection != null)
 				{
-					connection.closeStatement(stmt);
+					connection.closeResultSet(rs);
 				}
 			}
 		}
@@ -697,14 +728,6 @@ public class ObjMapping extends AbstractMapper {
 		}
 		finally
 		{
-			if(stmt != null)
-			{
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					LOG.error("Could not close statement", e);
-				}
-			}
 			if(connection != null)
 			{
 				try
@@ -747,19 +770,11 @@ public class ObjMapping extends AbstractMapper {
 		}
 		finally
 		{
-			if(stmt != null)
-			{
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					LOG.error("Could not close statement", e);
-				}
-			}
 			if(connection != null)
 			{
 				try
 				{
-					connection.closeStatement(stmt);
+					connection.closeResultSet(rs);
 				}
 				catch(Throwable e)
 				{
@@ -770,6 +785,95 @@ public class ObjMapping extends AbstractMapper {
 		return res;
 	}
 
+	public boolean persistLyftData(String toSave, String userName) {
+		DatabaseConnection conn =  null;
+		PreparedStatement stmt = null;
+		
+		boolean success = false;
+		
+		int userID = queryForID(userName);
+		
+		try
+		{
+			conn = getDatabaseConnection();
+			String sql = "insert into lyft_data (user_id, json_object) values (?,?) on duplicate key update json_object = (?)";
+			stmt = conn.setupPreparedStatement(sql);
+			stmt.setInt(1, userID);
+			stmt.setString(2, toSave);
+			stmt.setString(3, toSave);
+			
+			stmt.executeUpdate();
+			success = true;
+		}
+		catch( SQLException e)
+		{
+			LOG.error("Cannot persis data for lyft", e);
+		}
+		finally
+		{
+			if(conn != null)
+			{
+				conn.closeStatement(stmt);
+			}
+		}
+		return success;
+	}
+
+	public String getLyftData(Integer userId) {
+		DatabaseConnection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String jsonEscaped = null;
+		
+		try {
+			conn = getDatabaseConnection();
+			String sql = "select json_object from lyft_data where user_id = ?";
+			stmt = conn.setupPreparedStatement(sql);
+			stmt.setInt(1, userId);
+			
+			rs = stmt.executeQuery();
+			while(rs.next())
+			{
+				jsonEscaped = rs.getString("json_object");
+			}
+			
+		} catch (SQLException e) {
+			LOG.error("Cannot retrieve Lyft Data", e);
+		}
+		finally
+		{
+			if(conn != null)
+			{
+				conn.closeResultSet(rs);
+			}
+		}
+		
+		return jsonEscaped;
+	}
+
+	public void deleteLyftData(Integer userId) {
+		DatabaseConnection conn = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			conn = getDatabaseConnection();
+			String sql = "delete from lyft_data where user_id = ?";
+			stmt = conn.setupPreparedStatement(sql);
+			stmt.setInt(1, userId);
+			
+			stmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			LOG.error("Cannot retrieve Lyft Data", e);
+		}
+		finally
+		{
+			if(conn != null)
+			{
+				conn.closeStatement(stmt);
+			}
+		}
+	}
 
 
 }

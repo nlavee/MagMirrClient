@@ -5,13 +5,13 @@ body {
     background-attachment: fixed;
     background-size:100% 100%;
     text-align:center;
-	padding: 7px;
+	padding: 5px;
 	color:white;
 }
 
 h1 {
 	font-family: 'VT323', monospace;
-	font-size: 50px;
+	font-size: 40px;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: 500;
@@ -23,7 +23,7 @@ h1 {
 
 h3 {
 	font-family: 'VT323', monospace;
-	font-size: 24px;
+	font-size: 20px;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: 500;
@@ -35,7 +35,7 @@ h3 {
 
 h4 {
 	font-family: 'VT323', monospace;
-	font-size: 22px;
+	font-size: 18px;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: 500;
@@ -47,7 +47,7 @@ h4 {
 
 h6 {
 	font-family: 'VT323', monospace;
-	font-size: 17px;
+	font-size: 15px;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: 500;
@@ -63,7 +63,7 @@ img {
 
 p {
 	font-family: 'VT323', monospace;
-	font-size: 14px;
+	font-size: 13px;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: 400;
@@ -95,3 +95,10 @@ pre {
 	border: 1px groove white;
     outline-color: white;
 }
+
+#progress_bar
+{
+	text-align:center;
+	margin:auto;
+}
+	

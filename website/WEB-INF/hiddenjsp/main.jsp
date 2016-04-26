@@ -4,7 +4,7 @@
 <%@page import="org.json.JSONObject"%>
 <%@page import="java.util.*" %>
 <%@page import="java.text.*" %>
-<%@page import="org.nlavee.skidmore.webapps.database.beans.Message" %>
+<%@page import="org.nlavee.skidmore.webapps.database.beans.*" %>
 
 <%
 	String remoteAdd = (String) request.getSession().getAttribute(
@@ -21,6 +21,21 @@
 	String place = request.getAttribute("place").toString();
 	Message m = (Message) request.getAttribute("message");
 	ArrayList<String> newsAll = (ArrayList<String>) request.getAttribute("news");
+	
+	ArrayList<LyftRideTypeBean> lyftRideType = null;
+	ArrayList<LyftCostTypeBean> lyftCostType = null;
+	
+	if(request.getSession().getAttribute("lyft_data_type") != null)
+	{
+		if(request.getSession().getAttribute("lyft_data_type").toString().equals("1"))
+		{
+			lyftRideType = (ArrayList<LyftRideTypeBean>) request.getSession().getAttribute(VarNames.LYFT_DATA);
+		}
+		else if(request.getSession().getAttribute("lyft_data_type").toString().equals("2"))
+		{
+			lyftCostType = (ArrayList<LyftCostTypeBean>) request.getSession().getAttribute(VarNames.LYFT_DATA);
+		}
+	}
 	
 %>
 
@@ -65,38 +80,28 @@
 		<h1 class="date"><%=dateFormat.format(date)%></h1>
 	</div>
 	<div class="row">
-		<div class="col-md-3">
+		<div class="col-md-2">
 			<h3>
 				<b>Weather @ <%=place%></b>
 			</h3>
 		</div>
-		<div class="col-md-5">
+		<div class="col-md-7">
 			<h3><b>Top News For Your Selected Topics</b></h3>
 		</div>
-		<div class="col-md-4">
-		
+		<div class="col-md-3">
+			<h3>Lyft Information</h3>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-3">
-				<p><%=weatherDesc%>&nbsp;
-				<%
-				if (weatherDesc.equals("clear sky")) {
-				%>
+		<div class="col-md-2">
+				<h4><%=weatherDesc%>&nbsp;
 				<img src="staticFiles/icons/summer-inverted.png" />
-				<%
-					} else {
-				%>
-				<img src="staticFiles/icons/summer-inverted.png" />
-				<%
-					}
-				%>
-				</p>
-				<h4><%=temp%>&deg;</h4>
+				</h4>
+				<h4><%=temp%>&deg;C</h4>
 				<h4><%=humidity%>&#37; (Humidity <img src="staticFiles/icons/humidity.png"/>)</h4>
 				<h4><%=wind%> km/h (Wind <img src="staticFiles/icons/wind.png"/>)</h4>
 		</div>
-		<div class="col-md-5">
+		<div class="col-md-7">
 			<%
 				for(String news : newsAll)
 				{
@@ -106,9 +111,34 @@
 				}
 			%>
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<%
-				if(request.getAttribute("lyft") == null)
+				if(lyftRideType != null)
+				{
+					for(LyftRideTypeBean bean : lyftRideType)
+					{
+					%>
+						<h6><img src="<%=bean.getImgUrl()%>"/> <%=bean.getDisplayName()%> (<%=bean.getSeats()%> Seats)</h6>
+						<p>Cost Per Minute: <%=bean.getCostPerMinute() %> <%=bean.getCurrency() %> -- Base Charge: <%=bean.getBaseCharge() %> <%=bean.getCurrency() %>
+						-- Cost Per Mile: <%=bean.getCostPerMile() %> <%=bean.getCurrency() %>
+						-- Min Cost: <%=bean.getMinCost() %> <%=bean.getCurrency() %></p>
+						<hr>
+					<%
+					}
+				}
+				else if(lyftCostType != null)
+				{
+					for(LyftCostTypeBean bean : lyftCostType)
+					{
+					%>
+						<h6><%=bean.getDisplayName()%></h6>
+						<p>Estimated Trip Time: <%=bean.getEstimatedDurationSeconds() %> Seconds || Estimated Distance: <%=bean.getEstimatedDurationMiles() %> Miles.
+						-- Price Range (with <%=bean.getPrimeTimeSurcharge() %> prime time surcharge): <%=bean.getEstimatedCostMin() %> <%=bean.getCurrency() %> to <%=bean.getEstimatedCostMax() %> <%=bean.getCurrency() %></p> 
+						<hr>
+					<%
+					}
+				}
+				else
 				{
 					%>
 						<p>No information from Lyft at the moment.</p>

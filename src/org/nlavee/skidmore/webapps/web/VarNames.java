@@ -35,6 +35,8 @@ public interface VarNames {
 	public static final String LYFT_COST_MODE = "lyft_cost";
 	public static final String REMOTE_ADDRESS = "remote_address";
 	public static final String WEATHER = "weather_json";
+	public static final String LYFT_DATA = "lyft_data_client";
+	
 	/**
 	 * Different sections available
 	 */

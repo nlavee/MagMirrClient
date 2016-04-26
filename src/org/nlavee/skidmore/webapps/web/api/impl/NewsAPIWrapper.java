@@ -59,9 +59,11 @@ public class NewsAPIWrapper implements NewsInterface, VarNames, APIKEYS{
 		apiRequestURL.append(".json?api-key=");
 		apiRequestURL.append(NEWS_API_KEY);
 
+		ArrayList<NewsObj> parsedResult = null;
 		URL url;
 		try {
 			url = new URL(apiRequestURL.toString());
+			LOGGER.info("Requesting News: " + url);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
@@ -84,20 +86,20 @@ public class NewsAPIWrapper implements NewsInterface, VarNames, APIKEYS{
 
 			conn.disconnect();
 
+
+			// convert string to JSONObject
+			JSONObject jsonObj = new JSONObject(res.toString());
+
+			try {
+				parsedResult = parseSection(jsonObj);
+			} catch (ParseException e) {
+				LOGGER.error("Unable to parse Published Date", e);
+			}
+			
 		} catch (MalformedURLException e) {
 			LOGGER.error("URL formed wrongly in News API", e);
 		} catch (IOException e) {
 			LOGGER.error("IO Exception in News API", e);
-		}
-
-		// convert string to JSONObject
-		JSONObject jsonObj = new JSONObject(res.toString());
-
-		ArrayList<NewsObj> parsedResult = null;
-		try {
-			parsedResult = parseSection(jsonObj);
-		} catch (ParseException e) {
-			LOGGER.error("Unable to parse Published Date", e);
 		}
 
 		if(parsedResult != null) return parsedResult;
